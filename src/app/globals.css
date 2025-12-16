@@ -24,3 +24,7 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+#window-controls:hover #WindowControlIcon {
+  opacity: 0.6;
+}
