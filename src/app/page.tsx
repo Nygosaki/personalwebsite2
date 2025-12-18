@@ -1,17 +1,22 @@
 "use client";
 import { useState } from "react";
+import type { ReactNode } from "react";
 import Window from "@/components/window";
 import Taskbar from "@/components/taskbar";
 import DesktopSelectionArea from "@/components/desktop-selection-area";
 
-type AppWindow = { id: string; appId: string; title: string; minimized: boolean };
+type AppWindow = {
+  id: string;
+  appId: string;
+  title: string;
+  minimized: boolean;
+  payload?: ReactNode;
+};
 
 export default function Home() {
   const [windows, setWindows] = useState<AppWindow[]>([]);
 
-  const handleLaunch = (appId: string, payload?: { [k: string]: any }) => {
-    console.log("Launch requested:", appId, payload);
-
+  const handleLaunch = (appId: string, payload?: ReactNode) => {
     setWindows((prev) => {
       const idx = prev.findIndex((w) => w.appId === appId);
       if (idx !== -1) {
@@ -22,9 +27,8 @@ export default function Home() {
         return [...copy, { ...existing, minimized: false }];
       } else {
         const id = `${appId}-${Date.now()}`;
-        return [...prev, { id, appId, title: appId, minimized: false }];
+        return [...prev, { id, appId, title: appId, minimized: false, payload }];
       }
-      
     });
   };
 
@@ -39,7 +43,6 @@ export default function Home() {
   };
 
   return (
-    <div style={{ position: "relative", minHeight: "100vh", overflow: "hidden" }}>
     <DesktopSelectionArea>
       <video
         src="/wallpaper.mp4"
@@ -58,7 +61,6 @@ export default function Home() {
         }}
       />
 
-      <div style={{ position: "relative", zIndex: 0 }}>
       <div data-desktop-block-select="true" style={{ position: "relative", zIndex: 2 }}>
         {windows.map((w) => (
           <Window
@@ -67,12 +69,14 @@ export default function Home() {
             minimized={w.minimized}
             onMinimize={() => toggleMinimize(w.appId)}
             onClose={() => closeWindow(w.appId)}
+            payload={w.payload}
           />
         ))}
       </div>
 
-      <Taskbar onLaunch={handleLaunch} openWindows={windows} />
-    </div>
       <div data-desktop-block-select="true">
+        <Taskbar onLaunch={handleLaunch} openWindows={windows} />
+      </div>
+    </DesktopSelectionArea>
   );
 }

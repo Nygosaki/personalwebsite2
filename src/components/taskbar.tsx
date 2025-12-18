@@ -36,7 +36,7 @@ const QuickLaunchIcon = ({ icon, isActive = 0, id, onClick }: QuickLaunchIconPro
 );
 
 type TaskbarProps = {
-  onLaunch?: (appId: string, payload?: Record<string, any>) => void;
+  onLaunch?: (appId: string, payload?: React.ReactNode) => void;
   openWindows?: Array<{ appId: string; minimized: boolean }>;
 };
 

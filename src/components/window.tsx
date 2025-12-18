@@ -10,6 +10,7 @@ interface TerminalWindowProps {
   minimized?: boolean;
   onMinimize?: () => void;
   onClose?: () => void;
+  payload?: React.ReactNode;
 }
 
 type ResizeDir = "n" | "s" | "e" | "w" | "ne" | "nw" | "se" | "sw";
@@ -27,6 +28,7 @@ const Window: React.FC<TerminalWindowProps> = ({
   minimized = false,
   onMinimize,
   onClose,
+  payload
 }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -331,8 +333,7 @@ const Window: React.FC<TerminalWindowProps> = ({
           </div>
         ))}
       </div>
-
-      <div className="bg-[#1a1b26]/70 backdrop-blur-xl p-4 select-text overflow-y-auto flex-1 min-h-0" />
+        {payload}
     </div>
   );
 };
