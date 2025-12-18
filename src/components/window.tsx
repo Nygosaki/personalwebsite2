@@ -7,6 +7,9 @@ import { CgClose } from "react-icons/cg";
 interface TerminalWindowProps {
   title?: string;
   menu?: Record<string, Record<string, () => void>>;
+  minimized?: boolean;
+  onMinimize?: () => void;
+  onClose?: () => void;
 }
 
 type ResizeDir = "n" | "s" | "e" | "w" | "ne" | "nw" | "se" | "sw";
@@ -21,11 +24,12 @@ const Window: React.FC<TerminalWindowProps> = ({
     View: { Test: () => {} },
     Help: { Shortcuts: () => {}, "Source Code": () => {} },
   },
+  minimized = false,
+  onMinimize,
+  onClose,
 }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [size, setSize] = useState({ width: 0, height: 0 });
-  const [minimized, setMinimized] = useState(false);
-  const [closed, setClosed] = useState(false);
 
   const preMaximizeRef = useRef({ x: 0, y: 0, w: 0, h: 0 });
   const dragRef = useRef<{
@@ -72,7 +76,6 @@ const Window: React.FC<TerminalWindowProps> = ({
   );
 
   useEffect(() => {
-    // Initialize to a sensible centered size.
     const initialWidth = Math.min(896, Math.max(MIN_WIDTH, window.innerWidth - 40));
     const initialHeight = Math.min(640, Math.max(MIN_HEIGHT, window.innerHeight - 120));
     const initialX = Math.max(0, Math.round((window.innerWidth - initialWidth) / 2));
@@ -85,11 +88,21 @@ const Window: React.FC<TerminalWindowProps> = ({
   useEffect(() => {
     const onResize = () => {
       setPosition((prevPos) => {
-        const next = clampToViewport(prevPos.x, prevPos.y, size.width || MIN_WIDTH, size.height || MIN_HEIGHT);
+        const next = clampToViewport(
+          prevPos.x,
+          prevPos.y,
+          size.width || MIN_WIDTH,
+          size.height || MIN_HEIGHT
+        );
         return { x: next.x, y: next.y };
       });
       setSize((prevSize) => {
-        const next = clampToViewport(position.x, position.y, prevSize.width || MIN_WIDTH, prevSize.height || MIN_HEIGHT);
+        const next = clampToViewport(
+          position.x,
+          position.y,
+          prevSize.width || MIN_WIDTH,
+          prevSize.height || MIN_HEIGHT
+        );
         return { width: next.width, height: next.height };
       });
     };
@@ -111,7 +124,7 @@ const Window: React.FC<TerminalWindowProps> = ({
     try {
       (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
     } catch {
-      // ignore failures to capture (prevents exceptions when pointer started on a child)
+      // ignore
     }
 
     dragRef.current = {
@@ -212,39 +225,31 @@ const Window: React.FC<TerminalWindowProps> = ({
     }
   };
 
-  const closeWindow = () => {
-    console.log("meow")
-    setClosed(true);
-  };
-
   const maximizeWindow = () => {
     if (size.width === window.innerWidth && size.height === window.innerHeight) {
-      // Restore to original size and position
       setPosition({ x: preMaximizeRef.current.x, y: preMaximizeRef.current.y });
       setSize({ width: preMaximizeRef.current.w, height: preMaximizeRef.current.h });
       return;
-    } else {
-      // Save current size and position before maximizing
-      preMaximizeRef.current = { x: position.x, y: position.y, w: size.width, h: size.height };
+    }
+
+    preMaximizeRef.current = { x: position.x, y: position.y, w: size.width, h: size.height };
     const clamped = clampToViewport(0, 0, window.innerWidth, window.innerHeight);
     setPosition({ x: clamped.x, y: clamped.y });
     setSize({ width: clamped.width, height: clamped.height });
-    }
-}
+  };
 
-  const minimizeWindow = () => {
-    setMinimized(true);
-};
-
-if (closed) return null;  
-return (
-    // Main container: Rounded corners, shadow, dark border, font setup
+  return (
     <div
       id="terminal-window"
       className="fixed rounded-xl overflow-hidden shadow-2xl border border-gray-800 font-mono text-sm select-none flex flex-col"
-      style={{ left: position.x, top: position.y, width: size.width, height: size.height, visibility: minimized ? 'hidden' : 'visible' }}
+      style={{
+        left: position.x,
+        top: position.y,
+        width: size.width,
+        height: size.height,
+        visibility: minimized ? "hidden" : "visible",
+      }}
     >
-
       {/* Resize Handles */}
       <div className="absolute inset-x-2 top-0 h-2 cursor-n-resize touch-none z-60" onPointerDown={beginResize("n")} onPointerMove={onResizeMove} onPointerUp={onResizeEnd} />
       <div className="absolute inset-x-2 bottom-0 h-2 cursor-s-resize touch-none z-60" onPointerDown={beginResize("s")} onPointerMove={onResizeMove} onPointerUp={onResizeEnd} />
@@ -255,8 +260,7 @@ return (
       <div className="absolute left-0 bottom-0 w-3 h-3 cursor-sw-resize touch-none z-60" onPointerDown={beginResize("sw")} onPointerMove={onResizeMove} onPointerUp={onResizeEnd} />
       <div className="absolute right-0 bottom-0 w-3 h-3 cursor-se-resize touch-none z-60" onPointerDown={beginResize("se")} onPointerMove={onResizeMove} onPointerUp={onResizeEnd} />
 
-      {/* --- Title Bar --- */}
-      {/* Using relative positioning to center the title text perfectly amidst side controls */}
+      {/* Title Bar */}
       <div
         id="title-bar"
         className="bg-[#1a1b26] px-4 py-2 flex items-center justify-between relative h-10 cursor-move touch-none"
@@ -276,14 +280,30 @@ return (
 
         {/* Right Window Controls */}
         <div id="window-controls" className="flex items-center space-x-4 text-gray-400 z-10">
-          <button className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123] overflow-hidden flex items-center justify-center" onClick={() => minimizeWindow()}><FaRegWindowMinimize id="WindowControlIcon" style={{ transform: 'translateY(-3px)' }} color='black' size={8} strokeWidth={1.5} opacity={0}/></button> {/* Yellow */}
-          <button className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29] overflow-hidden flex items-center justify-center" onClick={() => maximizeWindow()}><RiExpandDiagonalS2Line id="WindowControlIcon" color='black' size={10} strokeWidth={1.5} opacity={0}/></button> {/* Green */}
-          <button className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e] overflow-hidden flex items-center justify-center" onClick={() => closeWindow()}><CgClose id="WindowControlIcon" color='black' size={9} strokeWidth={1.5} opacity={0}/></button> {/* Red */}
-        </div>
+          <button
+            className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123] overflow-hidden flex items-center justify-center"
+            onClick={onMinimize}
+          >
+            <FaRegWindowMinimize id="WindowControlIcon" style={{ transform: "translateY(-3px)" }} color="black" size={8} strokeWidth={1.5} opacity={0} />
+          </button>
 
+          <button
+            className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29] overflow-hidden flex items-center justify-center"
+            onClick={maximizeWindow}
+          >
+            <RiExpandDiagonalS2Line id="WindowControlIcon" color="black" size={10} strokeWidth={1.5} opacity={0} />
+          </button>
+
+          <button
+            className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e] overflow-hidden flex items-center justify-center"
+            onClick={onClose}
+          >
+            <CgClose id="WindowControlIcon" color="black" size={9} strokeWidth={1.5} opacity={0} />
+          </button>
+        </div>
       </div>
 
-      {/* --- Menu Bar with Dropdowns --- */}
+      {/* Menu Bar */}
       <div className="bg-[#24283b] px-2 flex text-gray-300 border-b border-gray-800 text-xs relative z-50">
         {Object.entries(menu).map(([menuTitle, items]) => (
           <div key={menuTitle} className="relative group">
@@ -312,14 +332,7 @@ return (
         ))}
       </div>
 
-      {/* --- Main Content Area --- */}
-      {/*
-         We use bg-opacity and backdrop-blur to simulate the translucent terminal look.
-         min-h-[500px] ensures it has the height roughly matching the image.
-         select-text allows the user to highlight the text inside the terminal area.
-      */}
-      <div className="bg-[#1a1b26]/70 backdrop-blur-xl p-4 select-text overflow-y-auto flex-1 min-h-0">
-      </div>
+      <div className="bg-[#1a1b26]/70 backdrop-blur-xl p-4 select-text overflow-y-auto flex-1 min-h-0" />
     </div>
   );
 };
