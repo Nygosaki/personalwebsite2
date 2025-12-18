@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Window from "@/components/window";
 import Taskbar from "@/components/taskbar";
+import DesktopSelectionArea from "@/components/desktop-selection-area";
 
 type AppWindow = { id: string; appId: string; title: string; minimized: boolean };
 
@@ -39,6 +40,7 @@ export default function Home() {
 
   return (
     <div style={{ position: "relative", minHeight: "100vh", overflow: "hidden" }}>
+    <DesktopSelectionArea>
       <video
         src="/wallpaper.mp4"
         autoPlay
@@ -57,6 +59,7 @@ export default function Home() {
       />
 
       <div style={{ position: "relative", zIndex: 0 }}>
+      <div data-desktop-block-select="true" style={{ position: "relative", zIndex: 2 }}>
         {windows.map((w) => (
           <Window
             key={w.id}
@@ -70,5 +73,6 @@ export default function Home() {
 
       <Taskbar onLaunch={handleLaunch} openWindows={windows} />
     </div>
+      <div data-desktop-block-select="true">
   );
 }
