@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
 import type { ReactNode } from "react";
-import Window from "@/components/window";
-import Taskbar from "@/components/taskbar";
-import DesktopSelectionArea from "@/components/desktop-selection-area";
+import Window from "@/components/desktop/window";
+import Taskbar from "@/components/desktop/taskbar";
+import DesktopSelectionArea from "@/components/desktop/desktop-selection-area";
 
 type AppWindow = {
   id: string;
