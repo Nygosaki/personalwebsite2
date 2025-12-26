@@ -1,6 +1,13 @@
-import {fileSystem, fileSystemToString, getDirectoryAtPath} from "@/lib/fileSystem"
-import { get } from "http";
-export default function handleCommand(command: string, location: string, setLocation: React.Dispatch<React.SetStateAction<string>>): string {
+import { fileSystemToString, getDirectoryAtPath } from "@/lib/fileSystem";
+
+export const TERMINAL_COMMANDS = ["help", "ls", "cd", "clear", "pwd", "echo", "open"] as const;
+export type TerminalCommand = (typeof TERMINAL_COMMANDS)[number];
+
+export default function handleCommand(
+    command: string,
+    location: string,
+    setLocation: React.Dispatch<React.SetStateAction<string>>
+): string {
     const trimmedCommand = command.trim().split(" ");
     let locationKey = location.split("/").filter(Boolean);
     let directory: any = getDirectoryAtPath(location);

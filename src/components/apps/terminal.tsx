@@ -1,5 +1,6 @@
 import React from "react";
-import handleCommand from "@/lib/commandHandling";
+import handleCommand, { TERMINAL_COMMANDS } from "@/lib/commandHandling";
+import { getDirectoryAtPath } from "@/lib/fileSystem";
 
 type TerminalLine =
   | { id: number; kind: "input"; location: string; text: string }
@@ -42,7 +43,112 @@ export default function Terminal() {
     });
   };
 
+  // if there are multiple matches, this autofills as much as possible till the divergence
+  const longestCommonPrefix = (items: string[]) => {
+    if (items.length === 0) return "";
+    let prefix = items[0] ?? "";
+    for (let i = 1; i < items.length; i++) {
+      const next = items[i] ?? "";
+      let j = 0;
+      while (j < prefix.length && j < next.length && prefix[j] === next[j]) j++;
+      prefix = prefix.slice(0, j);
+      if (prefix.length === 0) return "";
+    }
+    return prefix;
+  };
+
+  const getCompletionCandidates = (commandName: string | undefined, cwdLocation: string): string[] => {
+    const directory = getDirectoryAtPath(cwdLocation);
+
+    // Directory listing
+    if (commandName === "cd") {
+      if (Array.isArray(directory)) return [".."]; // can't cd into files list; still allow ..
+      return ["..", ...Object.keys(directory)];
+    }
+
+    if (commandName === "open") {
+      if (!Array.isArray(directory)) return [];
+      return directory.map((item: any) => String(item?.name ?? "")).filter(Boolean);
+    }
+
+    if (Array.isArray(directory)) {
+      return directory.map((item: any) => String(item?.name ?? "")).filter(Boolean);
+    }
+    return Object.keys(directory);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Tab") {
+      e.preventDefault();
+
+      // use current taxt blinker position instead of eol
+      const el = inputRef.current;
+      const caret = el?.selectionStart ?? inputValue.length;
+      const beforeCaret = inputValue.slice(0, caret);
+
+      const tokenStart = beforeCaret.lastIndexOf(" ") + 1;
+      const token = beforeCaret.slice(tokenStart); //current word being completed
+      const beforeToken = beforeCaret.slice(0, tokenStart);
+
+      const argsBeforeToken = beforeToken.trim().length === 0 ? [] : beforeToken.trim().split(/\s+/);
+      const isCompletingCommand = argsBeforeToken.length === 0;
+
+      // Determine command name (if present) for file completions.
+      const allArgs = inputValue.trim().length === 0 ? [] : inputValue.trim().split(/\s+/);
+      const commandName = allArgs[0];
+
+      if (isCompletingCommand) {
+        const candidates = [...TERMINAL_COMMANDS];
+        const matches = candidates.filter((c) => c.toLowerCase().startsWith(token.toLowerCase()));
+        if (matches.length === 0) return;
+
+        if (matches.length === 1) {
+          const completed = matches[0] + " ";
+          const newValue = inputValue.slice(0, tokenStart) + completed + inputValue.slice(caret);
+          setInputAndMoveCaretToEnd(newValue);
+          historyIndexRef.current = -1;
+          return;
+        }
+
+        const lcp = longestCommonPrefix(matches);
+        if (lcp.length > token.length) {
+          const newValue = inputValue.slice(0, tokenStart) + lcp + inputValue.slice(caret);
+          setInputAndMoveCaretToEnd(newValue);
+          historyIndexRef.current = -1;
+          return;
+        }
+
+        pushLine({ kind: "output", text: matches.join("\n") });
+        queueMicrotask(() => inputRef.current?.focus());
+        return;
+      }
+
+      // Completing an argument (file/dir) based on current directory
+      const candidates = getCompletionCandidates(commandName, location);
+      const matches = candidates.filter((c) => c.toLowerCase().startsWith(token.toLowerCase()));
+      if (matches.length === 0) return;
+
+      if (matches.length === 1) {
+        const completed = matches[0];
+        const newValue = inputValue.slice(0, tokenStart) + completed + inputValue.slice(caret);
+        setInputAndMoveCaretToEnd(newValue);
+        historyIndexRef.current = -1;
+        return;
+      }
+
+      const lcp = longestCommonPrefix(matches);
+      if (lcp.length > token.length) {
+        const newValue = inputValue.slice(0, tokenStart) + lcp + inputValue.slice(caret);
+        setInputAndMoveCaretToEnd(newValue);
+        historyIndexRef.current = -1;
+        return;
+      }
+
+      pushLine({ kind: "output", text: matches.join("\n") });
+      queueMicrotask(() => inputRef.current?.focus());
+      return;
+    }
+
     // History navigation
     if (e.key === "ArrowUp") {
       e.preventDefault();
@@ -88,14 +194,11 @@ export default function Terminal() {
     const value = (e.target as HTMLInputElement).value;
     pushLine({ kind: "input", location, text: value });
 
-    // ✅ Populate history BEFORE handleCommand()
     const trimmed = value.trim();
     if (trimmed.length > 0) {
       const history = historyRef.current;
-      // optional: avoid duplicates when pressing Enter repeatedly on same command
       if (history[history.length - 1] !== trimmed) history.push(trimmed);
     }
-    // reset history browsing state
     historyIndexRef.current = -1;
     draftRef.current = "";
 
