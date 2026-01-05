@@ -24,6 +24,7 @@
 .DS_Store
 *.pem
 .vscode
+copilot-instructions.md
 
 # debug
 npm-debug.log*
