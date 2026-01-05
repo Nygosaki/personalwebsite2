@@ -2,7 +2,7 @@ export const fileSystem = {
   "Applications/": [
     { name: "firefox.app", type: "app", id: "firefox", payload: `firefox` },
     { name: "terminal.app", type: "app", id: "terminal", payload: `terminal` },
-    { name: "explorer.app", type: "app", id: "explorer", payload: `explorer` },
+    { name: "explorer.app", type: "app", id: "fileexplorer", payload: `fileexplorer` },
     { name: "musicplayer.app", type: "app", id: "musicplayer", payload: `musicplayer` }
   ],
   "Documents/": [

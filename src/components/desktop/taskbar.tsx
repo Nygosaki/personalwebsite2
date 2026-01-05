@@ -18,6 +18,7 @@ import { VscTerminalPowershell } from 'react-icons/vsc';
 import Firefox from '@/components/apps/firefox';
 import Terminal from '@/components/apps/terminal';
 import MusicPlayer from '@/components/apps/musicplayer';
+import FileExplorer from '@/components/apps/fileexplorer';
 
 interface QuickLaunchIconProps {
   icon: React.ReactNode;
@@ -90,7 +91,7 @@ const Taskbar = ({ onLaunch, openWindows = [] }: TaskbarProps) => {
         {/* Quick Launch Icons */}
         <div className="flex items-center space-x-1 h-full">
           <QuickLaunchIcon id="terminal" icon={<VscTerminalPowershell size={20} />} onClick={(id)=>onLaunch?.(id, <Terminal />)} isActive={getIsActive("terminal")} />
-          <QuickLaunchIcon id="folder" icon={<FaFolder size={18} className="text-blue-500" />} onClick={(id)=>onLaunch?.(id)} isActive={getIsActive("folder")} />
+          <QuickLaunchIcon id="fileexplorer" icon={<FaFolder size={18} className="text-blue-500" />} onClick={(id)=>onLaunch?.(id, <FileExplorer />)} isActive={getIsActive("fileexplorer")} />
           <QuickLaunchIcon id="musicplayer" icon={<FcMusic size={24} />} onClick={(id)=>onLaunch?.(id, <MusicPlayer />)} isActive={getIsActive("musicplayer")} />
           <QuickLaunchIcon id="firefox" icon={<FaFirefox size={18} className="text-orange-500" />} onClick={(id)=>onLaunch?.(id, <Firefox />)} isActive={getIsActive("firefox")} />
         </div>
