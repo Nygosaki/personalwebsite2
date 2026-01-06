@@ -82,8 +82,22 @@ const Taskbar = ({ onLaunch, openWindows = [] }: TaskbarProps) => {
       {/* --- Left Section: Menus and Quick Launch --- */}
       <div className="flex items-center h-full">
         {/* "Applications" & "Places" Menus */}
-        <TopMenuButton icon={<MdApps size={22} className="text-gray-400" />} text="Applications" />
-        <TopMenuButton icon={<FaCompass size={18} className="text-gray-400" />} text="Places" />
+        <TopMenuButton
+          icon={<MdApps size={22} className="text-gray-400" />}
+          text="About Me"
+          onClick={() => {
+            const btn = document.getElementById("aboutme") as HTMLButtonElement | null;
+            btn?.click();
+          }}
+        />
+        <TopMenuButton
+          icon={<FaCompass size={18} className="text-gray-400" />}
+          text="Projects"
+          onClick={() => {
+            const btn = document.getElementById("projects") as HTMLButtonElement | null;
+            btn?.click();
+          }}
+        />
 
         {/* Vertical Separator */}
         <div className="h-6 w-px bg-gray-700 mx-2"></div>
@@ -126,8 +140,19 @@ const Taskbar = ({ onLaunch, openWindows = [] }: TaskbarProps) => {
 // --- Helper Components for cleaner code ---
 
 // For "Applications" and "Places"
-const TopMenuButton = ({ icon, text }: { icon: React.ReactNode; text: string }) => (
-  <button className="flex items-center space-x-2 px-3 h-full hover:bg-white/10 rounded transition-colors duration-200 focus:outline-none">
+const TopMenuButton = ({
+  icon,
+  text,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  text: string;
+  onClick?: () => void;
+}) => (
+  <button
+    onClick={onClick}
+    className="flex items-center space-x-2 px-3 h-full hover:bg-white/10 rounded transition-colors duration-200 focus:outline-none"
+  >
     {icon}
     <span className="font-medium">{text}</span>
   </button>

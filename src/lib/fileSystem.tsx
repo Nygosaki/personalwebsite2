@@ -10,13 +10,13 @@ export const fileSystem = {
       name: "aboutMe.html",
       type: "document",
       id: "aboutme",
-      payload: "<h1>About Me</h1><p>Replace this HTML with your content.</p>"
+      payload: "https://raw.githubusercontent.com/Nygosaki/Nygosaki/refs/heads/main/README.md"
     },
     {
       name: "projects.html",
       type: "document",
       id: "projects",
-      payload: "<h1>Projects</h1><p>Replace this HTML with your content.</p>"
+      payload: "https://api.github.com/users/Nygosaki/repos"
     }
   ],
   "Pictures/": [],

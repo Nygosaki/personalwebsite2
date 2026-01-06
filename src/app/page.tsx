@@ -55,7 +55,11 @@ export default function Home() {
             onClick={() => {
               // Each open should create a new window instance.
               const instanceAppId = `doc:${doc.id}:${Date.now()}`;
-              handleLaunch(instanceAppId, <DocumentViewer html={String(doc.payload ?? "")} />, String(doc.name ?? "Document"));
+              handleLaunch(
+                instanceAppId,
+                <DocumentViewer payload={String(doc.payload ?? "")} />,
+                String(doc.name ?? "Document")
+              );
             }}
           />
         ))}
