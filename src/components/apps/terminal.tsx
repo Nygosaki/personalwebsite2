@@ -3,8 +3,8 @@ import handleCommand, { TERMINAL_COMMANDS } from "@/lib/commandHandling";
 import { getDirectoryAtPath } from "@/lib/fileSystem";
 
 type TerminalLine =
-  | { id: number; kind: "input"; location: string; text: string }
-  | { id: number; kind: "output"; text: string };
+  | { id: number; kind: "input"; location: string; text: string; format?: "plain" | "html" }
+  | { id: number; kind: "output"; text: string; format?: "plain" | "html" };
 
 export default function Terminal() {
   const [location, setLocation] = React.useState("~/");
@@ -21,7 +21,7 @@ export default function Terminal() {
   const draftRef = React.useRef<string>("");
 
   const pushLine = React.useCallback(
-    (line: { kind: "input"; location: string; text: string } | { kind: "output"; text: string }) => {
+    (line: { kind: "input"; location: string; text: string, format?: "plain" | "html" } | { kind: "output"; text: string, format?: "plain" | "html" }) => {
       const id = nextIdRef.current++;
       setLines((prev) => [...prev, { id, ...line }]);
     },
@@ -208,7 +208,7 @@ export default function Terminal() {
     if (result === "clear") {
       setLines([]);
     } else {
-      pushLine({ kind: "output", text: result });
+      pushLine({ kind: "output", text: result, format: typeof result === "string" && result.startsWith("<") ? "html" : "plain" });
     }
 
     setInputValue("");
@@ -228,6 +228,16 @@ export default function Terminal() {
               <span className="text-blue-400">{line.location}</span>$&nbsp;
               <span className="text-white break-all">{line.text}</span>
             </div>
+          );
+        }
+
+        if (line.format === "html") {
+          return (
+            <div
+              key={line.id}
+              className="text-white"
+              dangerouslySetInnerHTML={{ __html: line.text }}
+            />
           );
         }
 

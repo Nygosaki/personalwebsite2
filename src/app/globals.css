@@ -28,3 +28,18 @@ body {
 #window-controls:hover #WindowControlIcon {
   opacity: 0.6;
 }
+
+.blahaj {
+  white-space: pre;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  line-height: 1.1;
+}
+
+.blahaj .c1 { color: var(--c1); }
+.blahaj .c2 { color: var(--c2); }
+.blahaj .c3 { color: var(--c3); }
+.blahaj .c4 { color: var(--c4); }
+.blahaj .c5 { color: var(--c5); }
+.neofetch   span.neofetchtext {
+    color: rgb(220, 63, 54);
+  }
