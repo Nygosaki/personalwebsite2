@@ -64,6 +64,7 @@ const Taskbar = ({ onLaunch, openWindows = [] }: TaskbarProps) => {
   // State for current time/date (initialized from current Date)
   const [time, setTime] = React.useState<string>(() => formatTime24(new Date()));
   const [date, setDate] = React.useState<string>(() => formatDateShort(new Date()));
+  const [batteryPct, setBatteryPct] = React.useState<number | null>(null);
 
   React.useEffect(() => {
     const id = setInterval(() => {
@@ -74,6 +75,29 @@ const Taskbar = ({ onLaunch, openWindows = [] }: TaskbarProps) => {
 
     return () => clearInterval(id);
   }, []);
+
+  React.useEffect(() => {
+    let unsubscribe: (() => void) | undefined;
+
+    const init = async () => {
+      if (typeof (navigator as any).getBattery !== "function") return;
+      try {
+        const manager = await (navigator as any).getBattery();
+        const update = () => setBatteryPct(Math.round(manager.level * 100));
+        update();
+        manager.addEventListener?.("levelchange", update);
+        unsubscribe = () => manager.removeEventListener?.("levelchange", update);
+      } catch {
+        // ignore
+      }
+    };
+
+    init();
+    return () => {
+      unsubscribe?.();
+    };
+  }, []);
+  
 
   return (
     // Main Taskbar Container
@@ -120,7 +144,17 @@ const Taskbar = ({ onLaunch, openWindows = [] }: TaskbarProps) => {
         {/* System Tray Icons */}
         <div className="flex items-center space-x-2 text-gray-400">
           <TrayIcon icon={<FaRegBell size={16} />} />
-          <TrayIcon icon={<FaBatteryThreeQuarters size={16} />} />
+
+          {/* Battery icon with percentage shown above it */}
+          <div className="relative flex items-center justify-center">
+            {batteryPct !== null && (
+              <span className="absolute -top-1.5 text-[10px] font-semibold text-gray-400 pointer-events-none">
+          {batteryPct}%
+              </span>
+            )}
+            <TrayIcon icon={<FaBatteryThreeQuarters size={16} />} />
+          </div>
+
           <TrayIcon icon={<FaVolumeUp size={16} />} />
           <TrayIcon icon={<FaBluetoothB size={14} />} />
           <TrayIcon icon={<FaWifi size={16} />} />
