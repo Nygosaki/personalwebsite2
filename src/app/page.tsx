@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 import Window from "@/components/desktop/window";
 import Taskbar from "@/components/desktop/taskbar";
 import DesktopSelectionArea from "@/components/desktop/desktop-selection-area";
+import DocumentViewer from "@/components/apps/documentviewer";
+import { fileSystem } from "@/lib/fileSystem";
 
 type AppWindow = {
   id: string;
@@ -16,7 +18,7 @@ type AppWindow = {
 export default function Home() {
   const [windows, setWindows] = useState<AppWindow[]>([]);
 
-  const handleLaunch = (appId: string, payload?: ReactNode) => {
+  const handleLaunch = (appId: string, payload?: ReactNode, title?: string) => {
     setWindows((prev) => {
       const idx = prev.findIndex((w) => w.appId === appId);
       if (idx !== -1) {
@@ -27,7 +29,7 @@ export default function Home() {
         return [...copy, { ...existing, minimized: false }];
       } else {
         const id = `${appId}-${Date.now()}`;
-        return [...prev, { id, appId, title: appId, minimized: false, payload }];
+        return [...prev, { id, appId, title: title ?? appId, minimized: false, payload }];
       }
     });
   };
@@ -44,6 +46,21 @@ export default function Home() {
 
   return (
     <DesktopSelectionArea>
+      {/* Hidden launch buttons for terminal/file-explorer driven opens */}
+      <div style={{ display: "none" }}>
+        {(fileSystem["Documents/"] as readonly any[]).map((doc: any) => (
+          <button
+            key={doc.id}
+            id={doc.id}
+            onClick={() => {
+              // Each open should create a new window instance.
+              const instanceAppId = `doc:${doc.id}:${Date.now()}`;
+              handleLaunch(instanceAppId, <DocumentViewer html={String(doc.payload ?? "")} />, String(doc.name ?? "Document"));
+            }}
+          />
+        ))}
+      </div>
+
       <video
         src="/wallpaper.mp4"
         autoPlay

@@ -6,8 +6,18 @@ export const fileSystem = {
     { name: "musicplayer.app", type: "app", id: "musicplayer", payload: `musicplayer` }
   ],
   "Documents/": [
-    { name: "aboutMe.html", type: "document", id: "aboutme", payload: "aboutme" },
-    { name: "projects.html", type: "document", id: "projects", payload: "projects" }
+    {
+      name: "aboutMe.html",
+      type: "document",
+      id: "aboutme",
+      payload: "<h1>About Me</h1><p>Replace this HTML with your content.</p>"
+    },
+    {
+      name: "projects.html",
+      type: "document",
+      id: "projects",
+      payload: "<h1>Projects</h1><p>Replace this HTML with your content.</p>"
+    }
   ],
   "Pictures/": [],
   "Music/": [],

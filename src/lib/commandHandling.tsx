@@ -48,9 +48,8 @@ export default function handleCommand(
             return trimmedCommand.slice(1).join(" ");
 
         case "open":
-            var file = directory
-            var file = (directory as readonly any[]).find((r: any) => r.name === trimmedCommand[1]);
-            if (!file) return `open: ${trimmedCommand[1]} not found`;
+          const file = (directory as readonly any[]).find((r: any) => r.name === trimmedCommand[1]);
+          if (!file) return `open: ${trimmedCommand[1]} not found`;
             switch (file["type"]) {
                 case "app":
                     const btn = document.getElementById(file["payload"]) as HTMLButtonElement | null;
@@ -59,9 +58,17 @@ export default function handleCommand(
                     }
                     btn.click();
                     return "";
+            case "document":
+              const docBtn = document.getElementById(file["id"]) as HTMLButtonElement | null;
+              if (!docBtn) {
+                return `open: document ${file["name"]} not found`;
+              }
+              docBtn.click();
+              return "";
                 case "txt":
                     return file["payload"];
             }
+          return "";
         
         case "blahaj":
             let c1

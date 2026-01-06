@@ -120,13 +120,23 @@ const FileExplorer = () => {
     if (Array.isArray(directory)) {
       return (directory as FileSystemLeafItem[]).map((entry) => {
         const payload = entry.payload;
-        const onOpen =
-          entry.type === "app" && payload
-            ? () => {
-                const btn = document.getElementById(payload) as HTMLButtonElement | null;
-                btn?.click();
-              }
-            : undefined;
+        const onOpen = (() => {
+          if (entry.type === "app" && payload) {
+            return () => {
+              const btn = document.getElementById(payload) as HTMLButtonElement | null;
+              btn?.click();
+            };
+          }
+
+          if (entry.type === "document" && entry.id) {
+            return () => {
+              const btn = document.getElementById(entry.id) as HTMLButtonElement | null;
+              btn?.click();
+            };
+          }
+
+          return undefined;
+        })();
 
         return {
           id: entry.id ?? entry.name,
