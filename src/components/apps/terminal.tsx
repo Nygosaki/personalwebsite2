@@ -261,6 +261,9 @@ export default function Terminal() {
             historyIndexRef.current = -1;
           }}
           onKeyDown={handleKeyDown}
+          autoComplete="off"
+          spellCheck={false}
+          autoCapitalize="off"
           autoFocus
         />
       </div>
