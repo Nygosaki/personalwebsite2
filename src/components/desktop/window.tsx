@@ -21,9 +21,9 @@ const MIN_HEIGHT = 240;
 const Window: React.FC<TerminalWindowProps> = ({
   title = "Window",
   menu = {
-    Edit: { Text: () => {} },
-    View: { Test: () => {} },
-    Help: { Shortcuts: () => {}, "Source Code": () => {} },
+    Edit: { Copy: () => {}, Paste: () => {} },
+    View: { Minimize: () => {onMinimize?.()} },
+    Help: { "Source Code": () => {window.open('https://github.com/Nygosaki/personalwebsite2')?.focus()} },
   },
   minimized = false,
   onMinimize,
