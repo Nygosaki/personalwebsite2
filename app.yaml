@@ -1,0 +1,11 @@
+# Use an LTS version. nodejs24 is likely not fully supported yet; 
+# nodejs20 or nodejs22 are the current stable standards.
+runtime: nodejs24 
+env: standard
+service: default
+
+env_variables:
+  NODE_ENV: 'production'
+
+# Explicitly define the entrypoint to ensure it uses the correct port
+entrypoint: npm run start

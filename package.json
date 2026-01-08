@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "build": "rm -rf ./build && NODE_ENV=production next build",
+    "start": "next start -p 8080",
+    "lint": "eslint",
+    "deploy": "npm run build && gcloud app deploy --project=portfolio-site-401705",
+    "gcp-build": ""
   },
   "dependencies": {
     "lucide-react": "^0.561.0",
